@@ -1,0 +1,18 @@
+{
+    "contents" : "#### ---- models.R\n#### ---- model fits\n\nlibrary(bartMachine)\nlibrary(caret)\n\n## ---- model 1\nfeats <- c('reservation_type','technology', \n           'actual_price','recommended_price',\n          'num_images','street_parked',\n          'description')\n\ndesign <- data_m[,feats]\nresponse <- data_m[,'total']\nmodl1 <- bartMachine(X=design, y = response)\n\n## ---- cross-validated model\ncheck_bart_error_assumptions(modl1)\nplot_convergence_diagnostics(modl1)\n\n## ---- variable importance\ncov_importance_test(modl1, covariates=feats)\n\n\n## ---- interactions?\n\ninteraction_investigator(modl1_cv, num_replicates_for_avg = 25,\n                         num_var_plot = 10, bottom_margin = 5)\n\n\n\n## ---- random forests\nlibrary(randomForest)\n\n## ---- pretty much no way this code is not ugly.\nmodel_mat <- with(data_m, \n  model.matrix(~reservation_type*technology*actual_price*recommended_price*num_images*street_parked*description))\n\nmodel_mat <- model_mat[,-1] ## pop the intercept term off.\ntotal<-data_m[,'total']\n\nmodl1 <- randomForest(x=model_mat,y=total,\n data=data_m, importance=TRUE, mtry=4)\n\nvar_imp <- importance(modl1)\nvar_imp <- data.frame(var_imp)\ncolnames(var_imp) <- c(\"inc_mse\", \"inc_node\")\nvar_imp$var <- row.names(var_imp)\n\nlibrary(ggplot2)\n\nvar_imp <- var_imp[order(var_imp$inc_mse, decreasing = T),]\n\nggplot(var_imp, aes(x=var, y=inc_mse, group=1)) + \n  geom_point(size=3)+\n  geom_line(colour=\"blue\")+\n  theme_bw() +\n  xlab(\"Feature\") + \n  ylab(\"Percent Increase is Mean Squared Error by Permuted Feature\") +\n  theme(axis.text.x=element_blank())\n  \n\nlibrary(forestFloor)\nlibrary(randomForest)\n\nmodel_mat_main <- with(data_m, \n       model.matrix(~reservation_type + technology + actual_price +\n                      recommended_price + num_images + street_parked + description))\nmodel_mat_main <- model_mat_main[,-1]\nmodl2 <- randomForest(x=model_mat_main,y=total,\n                      data=data_m, \n                      importance=TRUE,\n                      mtry=4, \n                      keep.inbag = TRUE)\n\nff <- forestFloor(rf.fit=modl2, X=model_mat_main)\nCol <- fcol(ff,2,orderByImportance=FALSE) #create color gradient see help(fcol)\nplot(ff,plot_seq=c(1,2),col=Col,plot_GOF=TRUE) \n\n\n",
+    "created" : 1458831884228.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4252825688",
+    "id" : "8713616B",
+    "lastKnownWriteTime" : 1458848408,
+    "path" : "~/Desktop/turo_challenge/models.R",
+    "project_path" : "models.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

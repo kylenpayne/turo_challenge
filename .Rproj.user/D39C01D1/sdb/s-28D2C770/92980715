@@ -1,0 +1,18 @@
+{
+    "contents" : "## ---- exploratory.R\n## ---- do some exploratory data analysis.\n\nlibrary(ggplot2)\n\ndata_m$reservation_type<-factor(reservation_type)\nggplot(data_m, aes(x=total)) + \n  geom_bar(aes(fill=factor(reservation_type)), position = \"dodge\")\n\nggplot(data_m, aes(x=total)) + \n  geom_bar(aes(fill=factor(technology)), position = \"dodge\")\n\nggplot(data_m, aes(x=actual_price, y=log(total)))+geom_point(aes(colour=technology)) +\n  geom_smooth()\n\nggplot(data_m, aes(x=description, y=total)) + \n  geom_point(aes(colour=factor(technology))) + \n  scale_y_log10()\n\nggplot(data_m, aes(x=actual_price, y=recommended_price)) + \n  geom_point(aes(colour=total, size=factor(technology))) + \n  scale_colour_gradient(low = \"darkblue\", high=\"orange\") + \n  theme_bw() + \n  xlab(\"Actual Price\") + \n  ylab(\"Recommended Price\") +\n  geom_hline(yintercept=50, colour='orange', linetype=\"longdash\") + \n  geom_vline(xintercept=50, colour='orange', linetype=\"longdash\")+\n  geom_abline(intercept = 0, colour='orange', linetype='longdash')\n\nggplot(data_m, aes(x=num_images, y=total)) + \n  geom_point(aes(colour=reservation_type,\n                 size=factor(technology))) + \n  scale_colour_gradient(low = \"darkblue\", high=\"orange\") + \n  theme_bw() + \n  xlab(\"Number of Images\") + \n  ylab(\"Total Reservation\") \n\n\n",
+    "created" : 1458795087068.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3227494473",
+    "id" : "92980715",
+    "lastKnownWriteTime" : 1458841927,
+    "path" : "~/Desktop/turo_challenge/exploratory.R",
+    "project_path" : "exploratory.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

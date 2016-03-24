@@ -1,0 +1,174 @@
+Turo Data Science Case Study Results
+========================================================
+author: Kyle N. Payne
+date: 3/24/2016
+
+Introduction
+========================================================
+
+- Question 1: What variables influence total number of reservations?
+- Question 2: How does the car's technology type seem to affect reservations?
+- Solution: Random Forests
+
+Data
+========================================================
+- Reservations $\Rightarrow$ Reduced to total reservations per unique id
+- Merged Reservations data with vehicle data
+- Created Target variable
+
+$$
+total = \text{ sum of all reservations for vehicle and res. type}
+$$
+
+```{r, echo=FALSE}
+source('data.R')
+```
+
+
+Exploratory Data Analysis
+========================================================
+Technology may interact with the total number of reservations, correlation of recommended price and actual price.
+```{r, echo= FALSE}
+library(ggplot2)
+ggplot(data_m, aes(x=actual_price, y=recommended_price)) + 
+  geom_point(aes(colour=total, size=factor(technology))) + 
+  scale_colour_gradient(low = "darkblue", high="orange") + 
+  theme_bw() + 
+  xlab("Actual Price") + 
+  ylab("Recommended Price") +
+  geom_hline(yintercept=50, colour='orange', linetype="longdash") + 
+  geom_vline(xintercept=50, colour='orange', linetype="longdash")+
+  geom_abline(intercept = 0, colour='orange', linetype='longdash')
+```
+
+Exploratory Data Analysis
+========================================================
+"Instantly Bookable" vehicles associated with total reservations.
+```{r, echo= FALSE}
+library(ggplot2)
+ggplot(data_m, aes(x=actual_price, y=recommended_price)) + 
+  geom_point(aes(colour=total, size=factor(technology))) + 
+  scale_colour_gradient(low = "darkblue", high="orange") + 
+  theme_bw() + 
+  xlab("Actual Price") + 
+  ylab("Recommended Price") +
+  geom_hline(yintercept=50, colour='orange', linetype="longdash") + 
+  geom_vline(xintercept=50, colour='orange', linetype="longdash")+
+  geom_abline(intercept = 0, colour='orange', linetype='longdash')
+```
+
+Exploratory Data Analysis
+========================================================
+
+When "instantly bookable" technology is not present, the average 
+$actual-recommended$ is larger and more variable!
+```{r, echo= FALSE}
+ggplot(data_m, aes(x=factor(technology), y=actual_price-recommended_price)) + 
+  geom_boxplot() + 
+  theme_bw() + 
+  xlab(label = "Instantly Bookable Technology") + 
+  ylab("Difference of Actual Price and Recommended Price")
+```
+
+Methods
+========================================================
+
+- Random Forests!
+- Simple collection of "weak learners"
+- Easy to implement
+
+
+Benefits of Random Forests
+========================================================
+- Tests for feature importance (Question 1)
+- Consistent Model Selection
+- Interaction Detection (Question 2)
+
+
+Results - Variable Importance
+========================================================
+How much the model suffers when a feature is "scrambled".
+```{r, echo=FALSE}
+library(randomForest)
+
+modl1 <- randomForest(total ~ 
+ reservation_type*technology*actual_price*recommended_price*num_images*street_parked*description,
+ data=data_m, importance=TRUE, mtry=4)
+
+var_imp <- importance(modl1)
+var_imp <- data.frame(var_imp)
+colnames(var_imp) <- c("inc_mse", "inc_node")
+var_imp$var <- row.names(var_imp)
+
+
+ggplot(var_imp, aes(x=var, y=inc_mse, group=1)) + 
+  geom_point(size=3)+
+  geom_line(colour="blue")+
+  theme_bw() +
+  xlab("Feature") + 
+  ylab("Percent Increase is Mean Squared Error by Permuted Feature")
+```
+ 
+Results - Variable Importance
+========================================================
+Recommended, Actual Prices are most important variables (easy to see why).
+
+```{r, echo=FALSE}
+library(knitr)
+kable(var_imp[,c(1,2)])
+```
+
+Results - Partial Dependence - Actual Price
+========================================================
+Average dependence of Total Reservations on Actual Price
+```{r, echo=FALSE, fig.height=5}
+library(forestFloor)
+total<-data_m[,'total']
+model_mat_main <- with(data_m, 
+       model.matrix(~reservation_type + technology + actual_price +
+                      recommended_price + num_images + street_parked + description))
+model_mat_main <- model_mat_main[,-1]
+modl2 <- randomForest(x=model_mat_main,y=total,
+                      data=data_m, 
+                      importance=TRUE,
+                      mtry=4, 
+                      keep.inbag = TRUE)
+ff <- forestFloor(rf.fit=modl2, X=model_mat_main)
+Col <- fcol(ff,2,orderByImportance=FALSE) #create color gradient see help(fcol)
+plot(ff,plot_seq=1,col=Col,plot_GOF = FALSE) 
+```
+
+Blue = "Instantly Bookable", Red  = non-"Instantly Bookable"
+
+Results - Partial Dependence - Recommended Price
+========================================================
+```{r, echo=FALSE,message=FALSE, warning=FALSE, fig.height=5}
+plot(ff,plot_seq=2,col=Col, plot_GOF = FALSE) 
+```
+Blue = "Instantly Bookable", Red = non-"Instantly Bookable"
+
+Conclusions - Question 1
+========================================================
+
+- Question 1: What variables influence total number of reservations?
+- Actual Price and Recommended Price
+- Evidence includes variable importance measures, and high partial dependence.
+- Highly Correlated
+
+Conclusions - Question 2
+========================================================
+
+- Question 2: How does the car's technology type seem to affect reservations? 
+- There appear to be a mediating effect of car technology on price (actual and recommended).
+- Cars with "Instantly Bookable" technology appear to be reserved more often, yet the
+recommended price is typically much higher than the actual price for these vehicles.
+
+Suggestions for Future Research
+========================================================
+- Feature Engineering (Actual Price v.s. Recommended Price)
+- Develop feature of price in subspace of price features (PCA)
+- Performance of model on independent test sets.
+- Model Selection.
+
+Thanks!
+========================================================

@@ -1,0 +1,18 @@
+{
+    "contents" : "## ---- data.R\n## ----script for loading data\n\n\nlibrary(plyr)\n\nreserves <- read.csv(\"~/Desktop/turo_challenge/reservations_(5).csv\")\nres <- ddply(reserves, .(reservation_type, vehicle_id),nrow )\ncolnames(res)[3] <- \"total\"\nvehicles <- read.csv(\"~/Desktop/turo_challenge/vehicles_(6).csv\")\n\ndata_m <- merge(res, vehicles, by = \"vehicle_id\")\n\n",
+    "created" : 1458785695672.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2562899270",
+    "id" : "C750C48E",
+    "lastKnownWriteTime" : 1458831881,
+    "path" : "~/Desktop/turo_challenge/data.R",
+    "project_path" : "data.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

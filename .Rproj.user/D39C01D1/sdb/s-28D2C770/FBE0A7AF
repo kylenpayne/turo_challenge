@@ -1,0 +1,18 @@
+{
+    "contents" : "## ---- utility.R\n## ---- utility functions\ninstall.packages(\"bartMachine\")\n",
+    "created" : 1458785572220.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2107066301",
+    "id" : "FBE0A7AF",
+    "lastKnownWriteTime" : 1458832528,
+    "path" : "~/Desktop/turo_challenge/utility.R",
+    "project_path" : "utility.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
